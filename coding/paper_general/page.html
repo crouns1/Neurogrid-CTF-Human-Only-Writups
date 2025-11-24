@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Coding</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.2.6/index.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.2.5/index.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script src="/static/js/prompts.js"></script>
+<style>
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+    }
+
+    code, pre, #editor {
+      font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .gradient-text {
+      background: linear-gradient(45deg, #00ff9d, #00b8ff, #7e3aff);
+      background-size: 200% 200%;
+      animation: gradient 6s ease infinite;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+    }
+
+    .card-glow {
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card-glow:hover {
+      box-shadow: 0 0 30px rgba(0, 255, 157, 0.2);
+    }
+
+    .glassmorphism {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 255, 157, 0.3) rgba(255, 255, 255, 0.1);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 157, 0.3);
+      border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 255, 157, 0.5);
+    }
+
+    #editor {
+      width: 100%;
+      height: 600px;
+    }
+
+    .lucide {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #results-panel {
+      max-height: 64px;
+      transition: max-height 0.5s ease-in-out;
+    }
+
+    #results-panel.expanded {
+      max-height: 400px;
+    }
+
+    #test-results {
+      max-height: 332px;
+      overflow-y: auto;
+    }
+
+    .run-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background:linear-gradient(to right, #00ff9d, #00b8ff);
+    }
+
+  .monaco-scrollable-element > .scrollbar > .slider {
+    border-radius: 8px !important;
+  }
+
+    #divider {
+    width: 8px;
+    cursor: col-resize;
+    background-color: rgba(255, 255, 255, 0.1);
+    }
+    #divider:hover {
+      background-color: rgba(0, 255, 157, 0.3);
+    }
+
+    #editor-container {
+      height: 100%;
+    }
+    #editor {
+      height: 100%;
+    }
+
+  </style>
+</head>
+<body class="min-h-screen bg-black text-white overflow-y-auto"><div id="background"></div>
+<!-- split container -->
+<div id="split-container" class="flex w-full h-screen overflow-hidden min-w-0">
+<!-- LEFT COLUMN: description and examples -->
+<div id="left-panel" class="overflow-y-auto space-y-4 h-screen custom-scrollbar px-2 flex-shrink-0 min-w-0" style="width: calc(50%);">
+<div class="glassmorphism p-6 rounded-xl card-glow space-y-6">
+<h1 class="text-2xl font-bold gradient-text"
+>Drumming Shrine</h1>
+<div class="text-gray-300 whitespace-pre-wrap break-words mb-4 leading-tight font-mono text-base"
+>At the heart of Mount Tsukimori lies a forgotten shrine where monks once struck sacred drums to mark the passing of seasons.  
+Now, only the echoes remain — faint, rhythmic, and unsettlingly precise.  
+
+Each night, the drums seem to play the same sequence of beats again and again.  
+Some claim it is merely the wind. Others believe it is the work of a spirit trapped in repetition, forever replaying the last perfect rhythm it heard.
+
+Your task is to determine whether the pattern of beats recorded from the shrine truly forms a single sequence…  
+or if it is merely a smaller rhythm, repeated endlessly through the hollow mountain.
+
+The input has the following format:
+
+The first line contains an integer N, the length of the rhythm.
+
+The second line contains N space-separated integers a₁, a₂, …, aₙ, representing the beats heard in sequence.
+
+Print YES if the entire rhythm can be obtained by repeating a smaller prefix (one or more times).  
+Otherwise, print NO.
+
+1 ≤ N ≤ 200000  
+1 ≤ aᵢ ≤ 10⁹
+</div>
+
+<div class="bg-black/30 p-4 rounded-lg border border-white/5 mb-4 whitespace-pre-wrap break-words overflow-x-auto custom-scrollbar leading-tight font-mono text-sm text-gray-300"
+><h1>Example:</h1>
+Input:
+6
+2 1 2 1 2 1
+
+Output:
+YES
+
+Input:
+10
+4 2 4 2 3 4 1 6 10 7
+
+Output:
+NO
+
+In the first example, the pattern [2, 1] repeats three times to form the full rhythm, so the answer is YES.
+
+In the second example, there is no shorter prefix that can be repeated to form the entire rhythm, so the answer is NO.</div>
+</div>
+</div>
+<!-- DRAGGABLE DIVIDER -->
+<div id="divider" class="w-2 min-h-full bg-white/10 cursor-col-resize"></div>
+<!-- RIGHT COLUMN: editor and test results -->
+<div id="right-panel" class="flex flex-grow flex-col h-screen px-2 min-w-0">
+<!-- Editor -->
+<div class="flex-grow min-h-0 overflow-auto custom-scrollbar">
+<div id="editor-container" class="relative w-full h-full">
+<div class="absolute top-0 right-4 z-50 flex gap-2">
+<button id="enter-fullscreen" class="text-xs px-2 py-1 border border-white/10 bg-black/30 text-white rounded hover:bg-white/10 transition" onclick="enterFullscreen()">⛶ Fullscreen</button>
+<button id="exit-fullscreen" class="text-xs px-2 py-1 border border-white/10 bg-black/30 text-white rounded hover:bg-white/10 transition hidden" onclick="exitFullscreen()">✖ Exit</button>
+</div>
+<div class="min-h-full w-full" id="editor"></div>
+</div>
+</div>
+<div class="glassmorphism rounded-xl card-glow p-4 flex justify-between items-center">
+<!-- left side language + upload button -->
+<div class="flex items-center space-x-2">
+<!-- Language Selector -->
+<select class="cursor-pointer bg-transparent text-white rounded-xl px-4 py-2.5 border border-white/20 hover:bg-white/5 transition" id="language-select" onchange="changeLanguage()">
+<option>python</option>
+<option>c</option>
+<option>cpp</option>
+<option>rust</option>
+</select>
+<!-- Upload Button -->
+<label class="cursor-pointer bg-transparent text-white rounded-xl px-4 py-2.5 border border-white/20 hover:bg-white/5 transition" for="upload-file">
+Upload Script
+<input type="file" id="upload-file" accept=".py,.c,.cpp,.cc,.rs" class="hidden" />
+</label>
+</div>
+<!-- Run Button -->
+<button class="run-button px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-300 bg-gradient-to-r from-emerald-400 to-blue-500 hover:from-emerald-500 hover:to-blue-600" id="run-button" onclick="handleRunCode()">
+<svg class="lucide" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polygon points="10 8 16 12 10 16 10 8"></polygon>
+</svg>
+<span>Run Code</span>
+</button>
+</div>
+<!-- Results Panel -->
+<div class="glassmorphism rounded-xl card-glow max-h-[250px]" id="results-panel">
+<div class="flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleResults()">
+<div class="flex items-center space-x-2">
+<svg class="lucide text-emerald-400" viewbox="0 0 24 24">
+<polyline points="4 17 10 11 4 5"></polyline>
+<line x1="12" x2="20" y1="19" y2="19"></line>
+</svg>
+<span class="font-medium">Test Results</span>
+</div>
+<svg class="lucide transform transition-transform" id="chevron" viewbox="0 0 24 24">
+<polyline points="6 9 12 15 18 9"></polyline>
+</svg>
+</div>
+<div class="hidden p-4 border-t border-white/5 custom-scrollbar max-h-64 overflow-y-auto" id="test-results"></div></div>
+</div>
+</div>
+<!-- Results Panel -->
+</div>
+</div>
+
+<!-- Success Modal -->
+<div class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm" id="success-modal">
+<div class="glassmorphism p-8 rounded-2xl max-w-2xl w-full mx-4 transform animate-float card-glow overflow-y-auto max-h-[80vh]">
+<div class="flex flex-col items-center text-center space-y-4">
+<div class="h-16 w-16 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full flex items-center justify-center">
+<svg class="lucide h-8 w-8 text-white" viewbox="0 0 24 24">
+<path d="M5.8 11.3 2 22l10.7-3.79"></path>
+<path d="M4 3h.01"></path>
+<path d="M22 8h.01"></path>
+<path d="M15 2h.01"></path>
+<path d="M22 20h.01"></path>
+<path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"></path>
+<path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11v0c-.11.7-.72 1.22-1.43 1.22H17"></path>
+<path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98v0C9.52 4.9 9 5.52 9 6.23V7"></path>
+<path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"></path>
+</svg>
+</div>
+<h2 class="text-2xl font-bold gradient-text">Congratulations! 🎉</h2>
+<p class="text-gray-300" id="flag"></p>
+<button class="run-button mt-6 px-6 py-2 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-lg font-medium hover:from-emerald-500 hover:to-blue-600 transition-all duration-300" onclick="closeSuccessModal()">
+          Continue Coding
+        </button>
+</div>
+</div>
+</div>
+<script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js';
+
+    // Wait for Three.js to load before initializing
+    window.addEventListener('load', () => {
+      // Three.js Background
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('background').appendChild(renderer.domElement);
+      renderer.domElement.style.position = 'fixed';
+      renderer.domElement.style.top = '0';
+      renderer.domElement.style.left = '0';
+      renderer.domElement.style.zIndex = '-1';
+      renderer.domElement.style.opacity = '0.5';
+
+      const portalGeometry = new THREE.TorusGeometry(2, 0.5, 16, 100);
+      const portalMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform float time;
+          varying vec2 vUv;
+          
+          void main() {
+            vec2 uv = vUv * 2.0 - 1.0;
+            float dist = length(uv);
+            
+            vec3 portalColor = vec3(0.0);
+            float greenPulse = sin(time * 2.0) * 0.5 + 0.5;
+            portalColor += vec3(0.1, 0.8, 0.4) * (1.0 - dist) * greenPulse;
+            
+            float angle = atan(uv.y, uv.x);
+            float spiral = sin(angle * 8.0 + time * 4.0 + dist * 8.0) * 0.5 + 0.5;
+            portalColor += vec3(0.0, 0.5, 0.2) * spiral * (1.0 - dist);
+            
+            float edge = smoothstep(0.8, 1.0, dist);
+            portalColor += vec3(0.2, 1.0, 0.5) * edge;
+            
+            gl_FragColor = vec4(portalColor, 0.3);
+          }
+        `,
+        transparent: true,
+        side: THREE.DoubleSide,
+      });
+
+      const portal = new THREE.Mesh(portalGeometry, portalMaterial);
+      portal.position.z = -5;
+      scene.add(portal);
+
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particlesCount = 2000;
+      const posArray = new Float32Array(particlesCount * 3);
+
+      for (let i = 0; i < particlesCount * 3; i += 3) {
+        posArray[i] = (Math.random() - 0.5) * 10;
+        posArray[i + 1] = (Math.random() - 0.5) * 10;
+        posArray[i + 2] = (Math.random() - 0.5) * 10;
+      }
+
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+      const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.005,
+        color: 0x00ff88,
+        transparent: true,
+        opacity: 0.4,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particlesMesh);
+
+      camera.position.z = 2;
+
+      let time = 0;
+      function animate() {
+        requestAnimationFrame(animate);
+        time += 0.005;
+        portalMaterial.uniforms.time.value = time;
+        portal.rotation.z += 0.001;
+        particlesMesh.rotation.y += 0.0002;
+        particlesMesh.rotation.x += 0.0001;
+        renderer.render(scene, camera);
+      }
+
+      animate();
+      });
+    </script>
+<script>
+  function escapeHTML(str) {
+    return str.replace(/[&<>"']/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[tag]));
+  }
+
+    function copyToClipboard(text, event = null) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          if (event) {
+            showCopyPopup(event.clientX, event.clientY);
+          }
+        })
+        .catch(err => {
+          console.error("Copy failed:", err);
+        });
+    }
+
+    function showCopyPopup(x, y) {
+      const popup = document.getElementById('copy-popup');
+      popup.style.top = `${y - 40}px`;  // slightly above cursor
+      popup.style.left = `${x}px`;
+      popup.style.opacity = '1';
+
+      setTimeout(() => {
+        popup.style.opacity = '0';
+      }, 1000);
+    }
+
+    // split container
+    const divider = document.getElementById('divider');
+    const leftPanel = document.getElementById('left-panel');
+    const container = document.getElementById('split-container')
+    let isResizing = false;
+
+    divider.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const containerRect = container.getBoundingClientRect();
+      const pointerX = e.clientX - containerRect.left;
+
+      const minWidth = containerRect.width * 0.15;
+      const maxWidth = containerRect.width * 0.85;
+
+      if (pointerX > minWidth && pointerX < maxWidth) {
+        leftPanel.style.width = `${pointerX}px`;
+        window.editor?.layout();
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+      document.body.style.cursor = 'default';
+    });
+
+  function enterFullscreen() {
+    const container = document.getElementById('editor-container');
+    if (container.requestFullscreen) {
+      container.requestFullscreen();
+    } else if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen();
+    } else if (container.msRequestFullscreen) {
+      container.msRequestFullscreen();
+    }
+  }
+
+  function exitFullscreen() {
+    if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }
+
+  document.addEventListener("fullscreenchange", () => {
+    const isFull = !!document.fullscreenElement;
+    document.getElementById('enter-fullscreen').classList.toggle('hidden', isFull);
+    document.getElementById('exit-fullscreen').classList.toggle('hidden', !isFull);
+    setTimeout(() => window.editor?.layout(), 100);
+  });
+
+
+
+</script>
+<div class="fixed z-50 px-3 py-1 rounded bg-emerald-500 text-sm text-white opacity-0 pointer-events-none transition-opacity duration-300" id="copy-popup" style="top: 0; left: 0;">
+  Input copied to clipboard!
+  </div>
+<script>
+ window.addEventListener('load', () => {
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    });
+
+    // Monaco Editor Setup
+
+    let editor;
+    let currentLanguage = localStorage.getItem('cachedLanguage') || 'python';
+
+    // Make editor globally accessible
+    window.editor = null;
+
+  function changeLanguage() {
+    const languageSelect = document.getElementById("language-select");
+    const newLanguage = languageSelect.value;
+
+    if (window.editor) {
+      const oldModel = window.editor.getModel();
+      const previousLanguage = oldModel.getLanguageId();
+      const currentCode = window.editor.getValue();
+      localStorage.setItem(`cachedCode-${previousLanguage}`, currentCode);
+      const newCode = localStorage.getItem(`cachedCode-${newLanguage}`) || languageTemplates[newLanguage];
+      const newModel = monaco.editor.createModel(newCode, newLanguage);
+      window.editor.setModel(newModel);
+      localStorage.setItem('cachedLanguage', newLanguage);
+    }
+  }
+
+    require.config({
+      paths: {
+        'vs': 'https://unpkg.com/monaco-editor@0.47.0/min/vs',
+      }
+    });
+
+    require(['vs/editor/editor.main'], function(_) {
+      const savedCode = localStorage.getItem(`cachedCode-${currentLanguage}`) || languageTemplates[currentLanguage];
+      document.getElementById("language-select").value = currentLanguage;
+
+      monaco.editor.defineTheme('cyberpunk', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'comment', foreground: '6A9955' },
+          { token: 'keyword', foreground: '00ff9d' },
+          { token: 'string', foreground: '00b8ff' },
+          { token: 'number', foreground: 'ff00ff' },
+          { token: 'function', foreground: '00ffea' },
+          { token: 'variable', foreground: 'ffffff' },
+        ],
+        colors: {
+          'editor.background': '#0a0a0a',
+          'editor.foreground': '#ffffff',
+          'editor.lineHighlightBackground': '#ffffff10',
+          'editorCursor.foreground': '#00ff9d',
+          'editor.selectionBackground': '#00ff9d30',
+          'editor.inactiveSelectionBackground': '#00ff9d20',
+          'editorLineNumber.foreground': '#ffffff40',
+          'editorLineNumber.activeForeground': '#00ff9d',
+          'editorIndentGuide.background': '#ffffff10',
+          'editorIndentGuide.activeBackground': '#00ff9d40',
+          'editorBracketMatch.background': '#00ff9d20',
+          'editorBracketMatch.border': '#00ff9d',
+          'scrollbarSlider.background': '#00ff9d20',
+          'scrollbarSlider.hoverBackground': '#00ff9d40',
+          'scrollbarSlider.activeBackground': '#00ff9d60',
+          'scrollbar.shadow': '#00000000'
+        },
+      });
+
+
+      window.editor = monaco.editor.create(document.getElementById('editor'), {
+        value: savedCode,
+        language: currentLanguage,
+        theme: 'cyberpunk',
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: 'on',
+        roundedSelection: false,
+        scrollBeyondLastLine: false,
+        verticalScrollbarSize: 4,
+        horizontalScrollbarSize: 4,
+        useShadows: false,
+        alwaysConsumeMouseWheel: false,
+        vertical: 'auto',
+        horizontal: 'auto',
+        arrowSize: 0,
+        automaticLayout: true,
+        fontFamily: 'JetBrains Mono',
+        fontLigatures: true,
+        padding: { top: 16, bottom: 16 },
+        cursorBlinking: 'smooth',
+        cursorSmoothCaretAnimation: 'on',
+        smoothScrolling: true,
+        renderLineHighlight: 'all',
+      });
+
+      let timeout;
+      window.editor.onDidChangeModelContent(() => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          localStorage.setItem(`cachedCode-${currentLanguage}`, window.editor.getValue());
+          localStorage.setItem('cachedLanguage', document.getElementById("language-select").value);
+        }, 300);
+      });
+
+    });
+
+    document.getElementById("upload-file").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const code = e.target.result;
+
+      const ext = file.name.split('.').pop().toLowerCase();
+      const extToLang = {
+        py: 'python',
+        c: 'c',
+        cpp: 'cpp',
+        cc: 'cpp',
+        rs: 'rust'
+      };
+
+      const detectedLang = extToLang[ext];
+      const newModel = monaco.editor.createModel(code, detectedLang);
+      window.editor.setModel(newModel);
+      document.getElementById("language-select").value = detectedLang;
+      localStorage.setItem(`cachedCode-${detectedLang}`, code);
+      localStorage.setItem('cachedLanguage', detectedLang);
+    };
+
+    reader.readAsText(file);
+  });
+
+    function toggleResults() {
+      const panel = document.getElementById('results-panel');
+      const results = document.getElementById('test-results');
+      const chevron = document.getElementById('chevron');
+      
+      if (results.classList.contains('hidden')) {
+        panel.classList.add('expanded');
+        results.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        panel.classList.remove('expanded');
+        results.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+      }
+      if (window.editor) {
+        window.editor.layout();
+      }
+    }
+
+    function updateTestResults(failedTestCase) {
+      const results = document.getElementById('test-results');
+      if (!failedTestCase) {
+        results.innerHTML = '<div class="text-gray-400">No test cases run yet.</div>';
+        return;
+      }
+      if (failedTestCase.error) {
+        results.innerHTML = `<div class="text-gray-400 whitespace-pre-wrap break-words">Compile Error: ${failedTestCase.error}</div>`;
+        return;
+      }
+      results.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+        <span class="text-base font-medium">Test case ${failedTestCase.index} failed - ${failedTestCase.cause}</span>
+        </div>`;
+      if (failedTestCase.visible) {
+        if (failedTestCase.runtime_error) {
+          results.innerHTML += `<div class="text-gray-400 whitespace-pre-wrap break-words">${failedTestCase.runtime_error}</div>`;
+          return;
+        }
+        results.innerHTML += `
+        <div class="text-sm space-y-1 font-mono">
+          <div class="text-gray-400">Input:</div>
+          <div 
+            class="text-gray-400 cursor-pointer hover:text-emerald-400 hover:bg-white/5 rounded transition-all whitespace-pre-wrap break-words"
+            onclick="copyToClipboard(\`${failedTestCase.input.replace(/`/g, '\\`')}\`, event)"
+            title="Click to copy input"
+          >${escapeHTML(failedTestCase.input)}
+          </div>
+          <div class="text-gray-400">Output:</div>
+          <div class="text-gray-400 whitespace-pre-wrap break-words"
+          >${escapeHTML(failedTestCase.output)}
+          </div>
+          <div class="text-gray-400">Expected:</div>
+          <div class="text-gray-400 whitespace-pre-wrap break-words"
+          >${escapeHTML(failedTestCase.expected)}
+          </div>
+          <div class="text-gray-400">Time: ${(parseFloat(failedTestCase.time) * 1000).toFixed(2)} ms</div>
+        </div>`;
+      } else {
+        results.innerHTML += `
+        <div class="text-sm space-y-1 font-mono">
+          <div class="text-gray-400">This test case is hidden.</div>
+        </div>`;
+      }
+  }
+
+    function showSuccessModal() {
+      document.getElementById('success-modal').classList.remove('hidden');
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('success-modal').classList.add('hidden');
+    }
+
+    let isRunning = false;
+
+    function handleRunCode() {
+      if (isRunning) return;
+      
+      const runButton = document.getElementById('run-button');
+      const panel = document.getElementById('results-panel');
+      const results = document.getElementById('test-results');
+      const chevron = document.getElementById('chevron');
+      
+      isRunning = true;
+      runButton.disabled = true;
+      runButton.innerHTML = `
+        
+        <span>Running...</span>
+      `;
+
+      panel.classList.add('expanded');
+      results.classList.remove('hidden');
+      chevron.style.transform = 'rotate(180deg)';
+      
+      setTimeout(() => {
+        
+      }, 1500);
+
+    var code = window.editor.getValue();
+          fetch("/run", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              code: code,
+              language: document.getElementById("language-select").value,
+            }),
+          })    
+            .then((response) => response.json())
+            .then((data) => {
+              isRunning = false;
+              runButton.disabled = false;
+              runButton.innerHTML = `
+                <svg class="lucide" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                <span>Run Code</span>
+              `;
+
+              if (data.challengeCompleted) {
+                document.getElementById('flag').innerHTML = data.flag
+                showSuccessModal();
+              }
+              else {
+                const failedTestCase = data.result;
+                updateTestResults(failedTestCase);
+              }
+            
+      console.log("Response from /run:", data);
+    }).catch((error) => {
+      console.error("Error:", error);
+      isRunning = false;
+      const runButton = document.getElementById("run-button");
+      runButton.disabled = false;
+      runButton.innerHTML = `
+        <svg class="lucide" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="10 8 16 12 10 16 10 8"></polygon>
+        </svg>
+        <span>Run Code</span>
+      `;
+      const results = document.getElementById("test-results");
+      results.classList.remove("hidden");
+      results.innerHTML = `<div class="text-red-400 font-mono">An error occurred. Could not run the code.</div>`;
+    })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+    }
+
+
+    // Initial test results render
+    updateTestResults();
+  </script>
+</body>
+</html>
