@@ -1,0 +1,25 @@
+How to get the flag:
+
+1.  **Download and Extract**:
+    - Downloaded the challenge file `manual_challenge.zip` from the provided URL.
+    - Extracted the zip file to retrieve `tradesman_manual.bat`.
+
+2.  **Analyze the BAT file**:
+    - Opened `tradesman_manual.bat` and observed it was heavily obfuscated.
+    - The obfuscation technique involved assigning small string fragments to random-looking environment variables (e.g., `set zapqo=d`, `set gxyke=p`).
+    - The final line of the script executed a command constructed by concatenating these variables (e.g., `%qdu%%ssf%%gfw%...`).
+
+3.  **Deobfuscate**:
+    - Created a Python script (`deobfuscate.py`) to automate the deobfuscation.
+    - The script parsed the `set` commands to build a mapping of variable names to their values.
+    - It then parsed the final long line of variable references and reconstructed the original command string.
+    - The reconstructed command was a PowerShell command that executed a base64 encoded string.
+
+4.  **Decode the Payload**:
+    - Extracted the base64 encoded string from the reconstructed command.
+    - Decoded the base64 string (using UTF-16LE encoding, which is standard for PowerShell encoded commands).
+
+5.  **Retrieve the Flag**:
+    - The decoded PowerShell script contained a variable `$uri` which held the flag.
+    - The line was: `$uri = 'http://malhq.htb/HTB{34dsy_d30bfusc4t10n_34sy_d3t3ct10n}'`
+    - The flag is `HTB{34dsy_d30bfusc4t10n_34sy_d3t3ct10n}`.
