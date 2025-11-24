@@ -1,0 +1,9 @@
+The challenge involved reverse engineering a binary named `iron`.
+1.  Downloaded and extracted the zip file.
+2.  Analyzed the binary using `objdump`.
+3.  Found a function `deprecated_core_shift` that compares the input with a decoded string.
+4.  The string is stored in `.rodata` at offset `0x2150` (in the binary file, this corresponds to the same offset since `.rodata` starts at `0x2000` and is mapped there).
+5.  The decoding logic was XORing each byte with `0x30`.
+6.  Extracted the bytes and decoded them to get the flag.
+
+Flag: HTB{r3wr1tt3n_r3s0nanc3}
